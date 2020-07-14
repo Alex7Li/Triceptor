@@ -1,8 +1,6 @@
 import * as PIXI from 'pixi.js'
 import React from 'react';
 import PropTypes from 'prop-types';
-import {Unit} from './unit.js'
-import {Cell} from './cell.js';
 import {boardSize} from './constants.js';
 import {Pusher} from './pusher.js';
 
@@ -12,7 +10,8 @@ const xOffset = 30.0;
 const yOffset = 30.0;
 const colorChange = 0x111141;
 
-var selected = null;
+/* The selected triangle */
+let selected = null;
 
 // Graphic data for a cell
 class Triangle {
@@ -40,21 +39,26 @@ class Triangle {
         this.unselect = this.unselect.bind(this);
         this.addUnit = this.addUnit.bind(this);
         this.removeUnit = this.removeUnit.bind(this);
+        this.registerMovement = this.registerMovement.bind(this);
         this.tri.on("pointertap", this.click);
         this.tri.interactive = true;
         this.tri.buttonMode = true;
         this.app.stage.addChild(this.tri);
-
     }
 
-    addUnit(unit) {
+    addUnit(/* Unit */ unit) {
         this.unit = unit;
     }
 
     removeUnit() {
         this.app.stage.removeChild(this.sprite);
         this.unit = null;
-        this.render();
+    }
+
+    registerMovement(unit){
+        this.addUnit(unit);
+        selected.removeUnit();
+        this.unselect();
     }
 
     select() {
@@ -63,12 +67,10 @@ class Triangle {
         }
         selected = this;
         this.color += colorChange;
-        this.render();
     }
 
     unselect() {
         selected.color -= colorChange;
-        selected.render();
         selected = null;
     }
 
@@ -77,23 +79,23 @@ class Triangle {
             if (this.unit) {
                 this.select();
             }
-        } else if (selected.unit.move(this.cell, this.props)) {
-            this.addUnit(selected.unit);
-            selected.removeUnit();
-            console.log(this.unit.orientation);
-            this.unselect();
         } else {
-            if (this.unit) {
-                this.select();
+            const /* {!Array<Cell>} */ changedCells = selected.unit.move(this.cell, this.props);
+            if (changedCells) {
+                this.registerMovement(selected.unit)
             } else {
-                this.unselect();
+                if (this.unit) {
+                    this.select();
+                } else {
+                    this.unselect();
+                }
             }
         }
         this.render();
     }
 
     render() {
-        // draw the triangle
+        // Draw the triangle.
         this.tri.clear();
         this.tri.beginFill(this.color, 1);
         this.tri.lineStyle(1.5, 0xFFFFFF);
@@ -110,13 +112,13 @@ class Triangle {
         }
         this.tri.endFill();
 
-        // draw the unit
+        // Draw the unit.
         if (this.unit instanceof Pusher) {
             if (this.sprite) {
                 this.app.stage.removeChild(this.sprite);
             }
             const sideLength = .8 * (triWidth / (1.0 + 2 / Math.sqrt(3)));
-            var spriteColor = 0;
+            let spriteColor = 0;
             switch (this.unit.team) {
                 case 1:
                     spriteColor = 0x1111AA;

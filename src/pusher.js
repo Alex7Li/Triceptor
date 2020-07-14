@@ -9,10 +9,6 @@ export class Pusher extends Unit {
 
     // Can you go to a given cell?
     canMove(G, toCell) {
-        const o = this.orientation;
-        if (toCell.hasUnit(G.units)) {
-            return false;
-        }
         if (toCell === this.cellInDir(G.cells, 'R')) {
             return 'R';
         } else if (toCell === this.cellInDir(G.cells, 'L')) {
@@ -21,11 +17,14 @@ export class Pusher extends Unit {
         return false;
     }
 
+    /*
+     * Move to a cell. Return an truthy array of changed cells on success, and a falsy
+     * value on failure.
+     */
     move(toCell, props) {
         const G = props.G;
         const dir = this.canMove(G, toCell)
         if (dir) {
-            const ctx = props.ctx;
             props.moves.pushMove(this, dir);
             props.events.endTurn();
             console.log("Moved");

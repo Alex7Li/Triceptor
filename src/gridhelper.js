@@ -1,19 +1,34 @@
 import {boardSize} from './constants.js';
-
-// if you are on a given cell with a given orientation,
+/*
+ * The cell after the next in a R/L direction away from a unit.
+ */
+export function secondCell(G, unit, dir){
+    let secondCell = null;
+    const nextCell = unit.cellInDir(G.cells, dir)
+    if (nextCell.unit) {
+        nextCell.unit.orientation = unit.orientation;
+        if (dir === 'R') {
+            secondCell = nextCell.cellInDir(G.cells, 'L');
+        } else if (dir === 'L') {
+            secondCell = nextCell.unit.cellInDir(G.cells, 'R');
+        }
+    }
+    return secondCell;
+}
+// If you are on a given cell with a given orientation,
 // what is the cell to the right?
 export function adjCell(cells, cell, orientation, direction) {
     const i = cell.i;
     const j = cell.j;
     let dir_code;
     switch (direction) {
-        case 'L': //left
+        case 'L': // Left.
             dir_code = 0
             break;
-        case 'R': //right
+        case 'R': // Right.
             dir_code = 1
             break;
-        case 'B': //back
+        case 'B': // Back.
             dir_code = 2
             break;
         default:
@@ -43,21 +58,21 @@ export function adjCell(cells, cell, orientation, direction) {
 }
 
 /*
-Rotate a triangle 120 degrees clockwise around a pivot
-triangle.
-*/
+ * Rotate a triangle 120 degrees clockwise around a pivot
+ * triangle.
+ */
 function rotate120(pivoti, pivotj, i, j) {
-    //First, shift the board so that the unit is at (0,0)
+    //F irst, shift the board so that the unit is at (0,0)
     i -= pivoti;
     j -= pivotj;
-    /*Now, moving right is +(0,1), moving left is +(1,0),
-    and moving down is +(1,1). Call f the result of a
-    2pi/3 rotation clockwise. 
-    f(0,-1) = (1,1)
-    f(1,1) = (0,1)
-    f(0,1) = (0,-1)
-    Using these 3 basis elements, we can rotate anything.
-    And this even works for upsidedown cells!
+    /* Now, moving right is +(0,1), moving left is +(1,0),
+     * and moving down is +(1,1). Call f the result of a
+     * 2pi/3 rotation clockwise.
+     * f(0,-1) = (1,1)
+     * f(1,1) = (0,1)
+     * f(0,1) = (0,-1)
+     * Using these 3 basis elements, we can rotate anything.
+     * And this even works for upsidedown cells!
     */
     const downMoves = i;
     j -= downMoves;
@@ -69,7 +84,7 @@ function rotate120(pivoti, pivotj, i, j) {
         i = rightMoves;
         j = downMoves;
     }
-    // shift board back to pivot
+    // Shift board back to pivot.
     i += pivoti;
     j += pivotj;
     return {i: i, j: j};

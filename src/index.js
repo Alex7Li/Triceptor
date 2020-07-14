@@ -7,6 +7,7 @@ import Triceptor from './game.js';
 const App = Client({
     game: Triceptor,
     board: Board,
+    numPlayers: 3,
     debug: true,
 });
 

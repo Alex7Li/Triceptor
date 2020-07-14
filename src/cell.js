@@ -1,4 +1,4 @@
-// Game data of a cell
+// Game data of a cell.
 export class Cell {
     /*
      * The constructor takes the minimum to define the game state.
