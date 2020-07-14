@@ -1,4 +1,5 @@
 import {Unit} from './unit.js';
+import {secondCell} from './gridhelper';
 
 export class Pusher extends Unit {
     constructor(cell, team, orientation) {
@@ -25,10 +26,31 @@ export class Pusher extends Unit {
         const G = props.G;
         const dir = this.canMove(G, toCell)
         if (dir) {
-            props.moves.pushMove(this, dir);
+            props.moves.move();
             props.events.endTurn();
-            console.log("Moved");
-            return true;
+            const nextCell = this.cellInDir(G.cells, dir)
+            let nextNextCell = secondCell(G, this, dir);
+            if (!nextCell) {
+                if (nextNextCell) {
+                    nextNextCell.unit = nextCell.unit;
+                    if (dir === 'R') {
+                        nextNextCell.unit.orientation = (1 + this.orientation) % 3;
+                    } else if (dir === 'L') {
+                        nextNextCell.unit.orientation = (2 + this.orientation) % 3;
+                    }
+                } else {
+                    nextCell.unit.markDead();
+                }
+                nextCell.unit = this;
+            }
+            // Turn and move current unit.
+            if (dir === 'R') {
+                this.orientation = (2 + this.orientation) % 3;
+            } else if (dir === 'L') {
+                this.orientation = (1 + this.orientation) % 3;
+            }
+            this.cell = nextCell;
+            return [nextCell.unit, nextNextCell?.unit];
         } else {
             return false;
         }

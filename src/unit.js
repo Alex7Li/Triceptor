@@ -28,6 +28,9 @@ export class Unit {
         this.cellInDir = this.cellInDir.bind(this);
     }
 
+    markDead(){
+    }
+
     cellInDir(cells, direction) {
         return adjCell(cells, this.cell, this.orientation, direction)
     }

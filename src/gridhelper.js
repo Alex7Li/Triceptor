@@ -1,6 +1,8 @@
 import {boardSize} from './constants.js';
+
 /*
- * The cell after the next in a R/L direction away from a unit.
+ * The cell after the next in a R/L direction away from a unit,
+ * or null if none exists
  */
 export function secondCell(G, unit, dir){
     let secondCell = null;
@@ -15,6 +17,7 @@ export function secondCell(G, unit, dir){
     }
     return secondCell;
 }
+
 // If you are on a given cell with a given orientation,
 // what is the cell to the right?
 export function adjCell(cells, cell, orientation, direction) {

@@ -12,6 +12,24 @@ const colorChange = 0x111141;
 
 /* The selected triangle */
 let selected = null;
+let tris = [[]];
+
+function renderAll(props, app) {
+    for (let i = 0; i < boardSize; i++) {
+        tris[i] = [];
+        for (let j = 0; j <= 2 * i; j++) {
+            let x = xOffset + (boardSize + j - i - 1) * triWidth / 2;
+            let y = yOffset + triHeight * i;
+            let tri = new Triangle(x, y, (j + 1) % 2, app, props.G.cells[i][j], props);
+            tri.render();
+            tris[i].push(tri);
+        }
+    }
+    props.G.units.forEach(unit => {
+        tris[unit.cell.i][unit.cell.j].addUnit(unit);
+        tris[unit.cell.i][unit.cell.j].render();
+    });
+}
 
 // Graphic data for a cell
 class Triangle {
@@ -55,10 +73,9 @@ class Triangle {
         this.unit = null;
     }
 
-    registerMovement(unit){
+    registerMovement(unit) {
         this.addUnit(unit);
         selected.removeUnit();
-        this.unselect();
     }
 
     select() {
@@ -80,9 +97,11 @@ class Triangle {
                 this.select();
             }
         } else {
-            const /* {!Array<Cell>} */ changedCells = selected.unit.move(this.cell, this.props);
-            if (changedCells) {
-                this.registerMovement(selected.unit)
+            const /* {!Array<Cell>} */ moved = selected.unit.move(this.cell, this.props);
+            if (moved) {
+                selected.removeUnit();
+                this.unselect();
+                renderAll(this.props, this.app);
             } else {
                 if (this.unit) {
                     this.select();
@@ -175,24 +194,8 @@ export default class Board extends React.Component {
         this.app = new PIXI.Application({
             width: 500, height: 400, backgroundColor: 0x1099bb, resolution: window.devicePixelRatio || 1,
         });
-        this.state = {triangles: []};
         this.myRef = React.createRef();
-        const tris = [[]];
-        for (let i = 0; i < boardSize; i++) {
-            tris[i] = [];
-            for (let j = 0; j <= 2 * i; j++) {
-                let x = xOffset + (boardSize + j - i - 1) * triWidth / 2;
-                let y = yOffset + triHeight * i;
-                let tri = new Triangle(x, y, (j + 1) % 2, this.app, this.props.G.cells[i][j], this.props);
-                this.state.triangles.push(tri);
-                tri.render();
-                tris[i].push(tri);
-            }
-        }
-        this.props.G.units.forEach(unit => {
-            tris[unit.cell.i][unit.cell.j].addUnit(unit);
-            tris[unit.cell.i][unit.cell.j].render();
-        });
+        renderAll(this.props, this.app);
         this.render = this.render.bind(this);
     }
 
